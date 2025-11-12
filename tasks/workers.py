@@ -21,6 +21,7 @@ def stock_scraper(task_id, ticket):
         balance_response = requests.get(balance_url)
         cash_response = requests.get(cash_url)
         r.set(f"progress:{task_id}", 20)
+        time.sleep(1)
 
         income_soup = BeautifulSoup(income_response.text, "html.parser")
         balance_soup = BeautifulSoup(balance_response.text, "html.parser")
@@ -32,6 +33,7 @@ def stock_scraper(task_id, ticket):
         cash_table = cash_soup.find("table")
         all_table = [income_table, balance_table, cash_table]
         r.set(f"progress:{task_id}", 40)
+        time.sleep(1)
 
         all_rows = []
         for table in all_table:
@@ -45,6 +47,7 @@ def stock_scraper(task_id, ticket):
                 formated_header = header.text.lower().replace('fy ', '')
                 fiscar_years.append(formated_header)
         r.set(f"progress:{task_id}", 60)
+        time.sleep(1)
 
         stock_data = {}
         for i, fiscar_year in enumerate(fiscar_years):
@@ -74,11 +77,13 @@ def stock_scraper(task_id, ticket):
     num_years = len(stock_data.keys())
     roic_avg = round(sum(roic_list) / num_years, 2)
     r.set(f"progress:{task_id}", 80)
-
+    time.sleep(1)
+    
     recent_year = list(stock_data.keys())[0]
     recent_total_debt = int(stock_data[recent_year].get("total debt", 0))
     fcf_to_debt = round(free_cash_flow / recent_total_debt, 2) if recent_total_debt != 0 else 0
     r.set(f"progress:{task_id}", 90)
+    
 
     stock_ratios = {"years": num_years, "roic mean": roic_avg, "fcf to debt": fcf_to_debt}
     r.set(f"progress:{task_id}", 100)
