@@ -65,10 +65,10 @@ def stock_scraper(task_id, ticket):
     # Ratios
     roic_list = []
     for year in stock_data.keys():
-        free_cash_flow = int(stock_data[year].get("free cash flow", 0))
-        total_debt = int(stock_data[year].get("total debt", 0))
-        total_equity = int(stock_data[year].get("shareholders' equity", 0))
-        cash_equivalents = int(stock_data[year].get("cash & equivalents", 0))
+        free_cash_flow = float(stock_data[year].get("free cash flow", 0))
+        total_debt = float(stock_data[year].get("total debt", 0))
+        total_equity = float(stock_data[year].get("shareholders' equity", 0))
+        cash_equivalents = float(stock_data[year].get("cash & equivalents", 0))
         invested_capital = total_debt + total_equity - cash_equivalents
 
         roic = round(free_cash_flow / invested_capital * 100, 2)
@@ -80,12 +80,13 @@ def stock_scraper(task_id, ticket):
     time.sleep(1)
     
     recent_year = list(stock_data.keys())[0]
-    recent_total_debt = int(stock_data[recent_year].get("total debt", 0))
-    fcf_to_debt = round(free_cash_flow / recent_total_debt, 2) if recent_total_debt != 0 else 0
+    recent_total_debt = float(stock_data[recent_year].get("total debt", 0))
+    recent_fcf = float(stock_data[recent_year].get("free cash flow", 0)) 
+
+    debt_to_fcf = round(recent_total_debt / recent_fcf, 2) if recent_total_debt != 0 else 0
     r.set(f"progress:{task_id}", 90)
     
-
-    stock_ratios = {"years": num_years, "roic mean": roic_avg, "fcf to debt": fcf_to_debt}
+    stock_ratios = {"years": num_years, "roic mean": roic_avg, "debt to fcf": debt_to_fcf}
     r.set(f"progress:{task_id}", 100)
 
     r.set(f"result:{task_id}", str(stock_ratios))
